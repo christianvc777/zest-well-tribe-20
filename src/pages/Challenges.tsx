@@ -4,9 +4,14 @@ import { Button } from "@/components/ui/button";
 import { MobileCard, MobileCardContent, MobileCardHeader, MobileCardTitle, MobileCardDescription } from "@/components/ui/mobile-card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { ChallengeDetailDialog } from "@/components/dialogs/ChallengeDetailDialog";
+import { CertificateDialog } from "@/components/dialogs/CertificateDialog";
 
 export default function Challenges() {
   const [activeTab, setActiveTab] = useState<"trending" | "myProgress" | "completed">("trending");
+  const [joinedChallenges, setJoinedChallenges] = useState<Set<number>>(new Set());
+  const [selectedChallenge, setSelectedChallenge] = useState<any>(null);
+  const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
 
   const trendingChallenges = [
     {

@@ -4,9 +4,15 @@ import { Button } from "@/components/ui/button";
 import { MobileCard, MobileCardContent, MobileCardHeader, MobileCardTitle } from "@/components/ui/mobile-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { CommentDialog } from "@/components/dialogs/CommentDialog";
+import { PostMenuDialog } from "@/components/dialogs/PostMenuDialog";
 
 export default function Feed() {
+  const navigate = useNavigate();
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
+  const [commentingPost, setCommentingPost] = useState<any>(null);
+  const [menuPost, setMenuPost] = useState<any>(null);
 
   const feedPosts = [
     {
@@ -97,7 +103,7 @@ export default function Feed() {
             <h1 className="text-xl font-bold">Feed de la Comunidad</h1>
             <p className="text-primary-glow text-sm">Conecta, inspira y crece</p>
           </div>
-          <Button size="sm" variant="secondary" className="bg-white/20 border-white/30 text-white hover:bg-white/30">
+          <Button size="sm" variant="secondary" className="bg-white/20 border-white/30 text-white hover:bg-white/30" onClick={() => navigate("/create-post")}>
             <Plus className="h-4 w-4 mr-1" />
             Publicar
           </Button>
@@ -164,7 +170,7 @@ export default function Feed() {
                   <span className="text-lg" title={post.type}>
                     {getPostTypeIcon(post.type)}
                   </span>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setMenuPost(post)}>
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </div>
@@ -191,7 +197,7 @@ export default function Feed() {
                     </span>
                   </Button>
                   
-                  <Button variant="ghost" size="sm" className="flex items-center space-x-1 h-8 text-muted-foreground">
+                  <Button variant="ghost" size="sm" className="flex items-center space-x-1 h-8 text-muted-foreground" onClick={() => setCommentingPost(post)}>
                     <MessageCircle className="h-4 w-4" />
                     <span className="text-xs">{post.stats.comments}</span>
                   </Button>
@@ -212,6 +218,23 @@ export default function Feed() {
           <p className="text-sm text-muted-foreground mt-1">No hay más publicaciones nuevas</p>
         </div>
       </div>
+
+      {/* Dialogs */}
+      {commentingPost && (
+        <CommentDialog
+          isOpen={!!commentingPost}
+          onClose={() => setCommentingPost(null)}
+          post={commentingPost}
+        />
+      )}
+      
+      {menuPost && (
+        <PostMenuDialog
+          isOpen={!!menuPost}
+          onClose={() => setMenuPost(null)}
+          post={menuPost}
+        />
+      )}
     </div>
   );
 }

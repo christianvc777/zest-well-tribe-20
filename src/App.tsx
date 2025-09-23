@@ -12,6 +12,8 @@ import Map from "./pages/Map";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import CommunityActive from "./pages/CommunityActive";
+import CreatePost from "./pages/CreatePost";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,8 @@ const App = () => (
             <Route path="/map" element={<Map />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/community-active" element={<CommunityActive />} />
+            <Route path="/create-post" element={<CreatePost />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <MobileNavigation />

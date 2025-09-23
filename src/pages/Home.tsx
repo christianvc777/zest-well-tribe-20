@@ -1,9 +1,16 @@
+import { useState } from "react";
 import { Activity, TrendingUp, Users, Calendar, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileCard, MobileCardContent, MobileCardHeader, MobileCardTitle } from "@/components/ui/mobile-card";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { StatsDetailDialog } from "@/components/dialogs/StatsDetailDialog";
+import { AchievementDetailDialog } from "@/components/dialogs/AchievementDetailDialog";
 
 export default function Home() {
+  const navigate = useNavigate();
+  const [selectedStat, setSelectedStat] = useState<any>(null);
+  const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
   const dailyStats = [
     { label: "Pasos", value: "8,234", target: "10,000", icon: Activity, color: "text-primary" },
     { label: "Calorías", value: "320", target: "500", icon: TrendingUp, color: "text-secondary" },
@@ -12,7 +19,7 @@ export default function Home() {
 
   const quickActions = [
     { title: "Nuevo Reto", subtitle: "Únete a un desafío", path: "/challenges", variant: "glow" as const },
-    { title: "Entrenar Ahora", subtitle: "Rutina personalizada", path: "/workouts", variant: "elevated" as const },
+    { title: "Entrenar Ahora", subtitle: "Rutina personalizada", path: "/challenges", variant: "elevated" as const },
     { title: "Buscar Eventos", subtitle: "Actividades cerca", path: "/events", variant: "elevated" as const },
   ];
 
@@ -38,7 +45,7 @@ export default function Home() {
           <h2 className="text-xl font-bold mb-4">Progreso de Hoy</h2>
           <div className="grid grid-cols-1 gap-4">
             {dailyStats.map((stat, index) => (
-              <MobileCard key={index} variant="elevated">
+              <MobileCard key={index} variant="elevated" className="cursor-pointer hover:shadow-elevated transition-all" onClick={() => setSelectedStat(stat)}>
                 <MobileCardContent className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <stat.icon className={`h-8 w-8 ${stat.color}`} />
@@ -69,7 +76,7 @@ export default function Home() {
           <h2 className="text-xl font-bold mb-4">Acciones Rápidas</h2>
           <div className="grid grid-cols-1 gap-4">
             {quickActions.map((action, index) => (
-              <MobileCard key={index} variant={action.variant}>
+              <MobileCard key={index} variant={action.variant} className="cursor-pointer hover:shadow-elevated transition-all" onClick={() => navigate(action.path)}>
                 <MobileCardContent className="flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold">{action.title}</h3>
@@ -87,7 +94,7 @@ export default function Home() {
           <h2 className="text-xl font-bold mb-4">Logros Recientes</h2>
           <div className="space-y-3">
             {recentAchievements.map((achievement, index) => (
-              <MobileCard key={index}>
+              <MobileCard key={index} className="cursor-pointer hover:shadow-elevated transition-all" onClick={() => setSelectedAchievement(achievement)}>
                 <MobileCardContent className="flex items-start space-x-3">
                   <div className="flex-shrink-0">
                     <Star className="h-6 w-6 text-warning" />
@@ -111,7 +118,7 @@ export default function Home() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold">Comunidad Activa</h2>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/community-active")}>
               Ver todo <ArrowRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
@@ -138,6 +145,23 @@ export default function Home() {
           </MobileCard>
         </section>
       </div>
+
+      {/* Dialogs */}
+      {selectedStat && (
+        <StatsDetailDialog
+          isOpen={!!selectedStat}
+          onClose={() => setSelectedStat(null)}
+          stat={selectedStat}
+        />
+      )}
+      
+      {selectedAchievement && (
+        <AchievementDetailDialog
+          isOpen={!!selectedAchievement}
+          onClose={() => setSelectedAchievement(null)}
+          achievement={selectedAchievement}
+        />
+      )}
     </div>
   );
 }
