@@ -5,11 +5,19 @@ import { MobileCard, MobileCardContent, MobileCardHeader, MobileCardTitle } from
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { SimpleChart } from "@/components/ui/simple-chart";
+import EditProfileDialog from "@/components/dialogs/EditProfileDialog";
+import ShareProfileDialog from "@/components/dialogs/ShareProfileDialog";
+import SettingsDialog from "@/components/dialogs/SettingsDialog";
+import FavoritesDialog from "@/components/dialogs/FavoritesDialog";
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState<"stats" | "achievements" | "activity">("stats");
-
-  const userProfile = {
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showShareProfile, setShowShareProfile] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [userProfile, setUserProfile] = useState({
     name: "María González",
     username: "@maria_fitness",
     email: "maria@example.com",
@@ -24,7 +32,18 @@ export default function Profile() {
     followers: 1247,
     following: 589,
     posts: 156
-  };
+  });
+
+  // Sample chart data
+  const weeklyData = [
+    { day: "L", value: 45 },
+    { day: "M", value: 62 },
+    { day: "M", value: 38 },
+    { day: "J", value: 75 },
+    { day: "V", value: 50 },
+    { day: "S", value: 82 },
+    { day: "D", value: 65 }
+  ];
 
   const stats = [
     { label: "Entrenamientos", value: "127", period: "Este año", icon: Activity, color: "text-primary" },
@@ -119,10 +138,20 @@ export default function Profile() {
             </div>
           </div>
           <div className="flex flex-col space-y-2">
-            <Button size="sm" variant="secondary" className="bg-white/20 border-white/30 text-white hover:bg-white/30">
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+              onClick={() => setShowEditProfile(true)}
+            >
               <Edit className="h-4 w-4" />
             </Button>
-            <Button size="sm" variant="secondary" className="bg-white/20 border-white/30 text-white hover:bg-white/30">
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+              onClick={() => setShowShareProfile(true)}
+            >
               <Share className="h-4 w-4" />
             </Button>
           </div>
@@ -214,17 +243,19 @@ export default function Profile() {
               ))}
             </div>
 
-            {/* Gráfico placeholder */}
+            {/* Gráfico de progreso semanal */}
             <MobileCard variant="elevated">
               <MobileCardHeader>
                 <MobileCardTitle>Progreso Semanal</MobileCardTitle>
               </MobileCardHeader>
               <MobileCardContent>
-                <div className="h-32 bg-gradient-card rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <Activity className="h-8 w-8 text-primary mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Gráfico de actividad semanal</p>
-                  </div>
+                <div className="h-32">
+                  <SimpleChart data={weeklyData} height={120} color="hsl(var(--primary))" />
+                </div>
+                <div className="mt-3 text-center">
+                  <p className="text-xs text-muted-foreground">
+                    Minutos de actividad esta semana: <span className="font-medium text-primary">417 min</span>
+                  </p>
                 </div>
               </MobileCardContent>
             </MobileCard>
@@ -312,11 +343,19 @@ export default function Profile() {
           </MobileCardHeader>
           <MobileCardContent>
             <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                className="flex items-center space-x-2"
+                onClick={() => setShowSettings(true)}
+              >
                 <Settings className="h-4 w-4" />
                 <span>Configuración</span>
               </Button>
-              <Button variant="outline" className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                className="flex items-center space-x-2"
+                onClick={() => setShowFavorites(true)}
+              >
                 <Heart className="h-4 w-4" />
                 <span>Favoritos</span>
               </Button>
@@ -324,6 +363,27 @@ export default function Profile() {
           </MobileCardContent>
         </MobileCard>
       </div>
+
+      {/* Dialogs */}
+      <EditProfileDialog
+        isOpen={showEditProfile}
+        onClose={() => setShowEditProfile(false)}
+        profile={userProfile}
+        onSave={setUserProfile}
+      />
+      <ShareProfileDialog
+        isOpen={showShareProfile}
+        onClose={() => setShowShareProfile(false)}
+        profile={userProfile}
+      />
+      <SettingsDialog
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
+      <FavoritesDialog
+        isOpen={showFavorites}
+        onClose={() => setShowFavorites(false)}
+      />
     </div>
   );
 }

@@ -4,10 +4,16 @@ import { Button } from "@/components/ui/button";
 import { MobileCard, MobileCardContent, MobileCardHeader, MobileCardTitle } from "@/components/ui/mobile-card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import LocationDialog from "@/components/dialogs/LocationDialog";
+import ContactDialog from "@/components/dialogs/ContactDialog";
 
 export default function Map() {
   const [activeFilter, setActiveFilter] = useState<"all" | "gyms" | "parks" | "studios" | "pools">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [showContactDialog, setShowContactDialog] = useState(false);
+  const [favorites, setFavorites] = useState<number[]>([2, 6]); // Initially favorited items
 
   const wellnessSpaces = [
     {
@@ -20,7 +26,7 @@ export default function Map() {
       rating: 4.7,
       reviews: 245,
       phone: "+57 1 234-5678",
-      website: "www.fitlife.com",
+      website: "https://bodytech.com.co/",
       hours: "05:00 - 23:00",
       price: "Desde $80.000/mes",
       amenities: ["Pesas", "Cardio", "Clases grupales", "Sauna"],
@@ -56,7 +62,7 @@ export default function Map() {
       rating: 4.9,
       reviews: 156,
       phone: "+57 1 345-6789",
-      website: "www.yogastudio.com",
+      website: "https://www.lululemon.com/",
       hours: "06:00 - 21:00",
       price: "Desde $120.000/mes",
       amenities: ["Yoga", "Pilates", "Meditación", "Reformer"],
@@ -74,7 +80,7 @@ export default function Map() {
       rating: 4.5,
       reviews: 89,
       phone: "+57 1 456-7890",
-      website: "www.aquacenter.com",
+      website: "https://www.speedo.com/",
       hours: "06:00 - 22:00",
       price: "Desde $60.000/mes",
       amenities: ["Piscina olímpica", "Aqua aeróbicos", "Jacuzzi", "Sauna"],
@@ -92,7 +98,7 @@ export default function Map() {
       rating: 4.6,
       reviews: 78,
       phone: "+57 1 567-8901",
-      website: "www.crossfitelite.com",
+      website: "https://games.crossfit.com/",
       hours: "05:30 - 22:00",
       price: "Desde $150.000/mes",
       amenities: ["CrossFit", "Powerlifting", "Competencias", "Coaching"],
@@ -172,8 +178,27 @@ export default function Map() {
   });
 
   const toggleFavorite = (spaceId: number) => {
-    // En una app real, esto se sincronizaría con el backend
-    console.log(`Toggle favorite for space ${spaceId}`);
+    setFavorites(prev => 
+      prev.includes(spaceId) 
+        ? prev.filter(id => id !== spaceId)
+        : [...prev, spaceId]
+    );
+  };
+
+  const handleLocationClick = (space: any) => {
+    setSelectedLocation(space);
+    setShowLocationDialog(true);
+  };
+
+  const handleCallClick = (space: any) => {
+    setSelectedLocation(space);
+    setShowContactDialog(true);
+  };
+
+  const handleWebsiteClick = (website: string) => {
+    if (website && website !== "N/A") {
+      window.open(website, '_blank');
+    }
   };
 
   return (
@@ -283,7 +308,7 @@ export default function Map() {
                     className="h-8 w-8 p-0"
                     onClick={() => toggleFavorite(space.id)}
                   >
-                    <Heart className={`h-4 w-4 ${space.isFavorite ? 'fill-current text-red-500' : 'text-muted-foreground'}`} />
+                    <Heart className={`h-4 w-4 ${favorites.includes(space.id) ? 'fill-current text-red-500' : 'text-muted-foreground'}`} />
                   </Button>
                 </div>
               </MobileCardHeader>
@@ -333,19 +358,29 @@ export default function Map() {
                   <div className="flex items-center justify-between pt-2 border-t border-border">
                     <div className="flex space-x-2">
                       {space.phone !== "N/A" && (
-                        <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex items-center space-x-1"
+                          onClick={() => handleCallClick(space)}
+                        >
                           <Phone className="h-3 w-3" />
                           <span className="text-xs">Llamar</span>
                         </Button>
                       )}
                       {space.website !== "N/A" && (
-                        <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex items-center space-x-1"
+                          onClick={() => handleWebsiteClick(space.website)}
+                        >
                           <Globe className="h-3 w-3" />
                           <span className="text-xs">Web</span>
                         </Button>
                       )}
                     </div>
-                    <Button size="sm" className="bg-primary">
+                    <Button size="sm" className="bg-primary" onClick={() => handleLocationClick(space)}>
                       <Navigation className="h-3 w-3 mr-1" />
                       Ir
                     </Button>
@@ -366,6 +401,22 @@ export default function Map() {
           </div>
         )}
       </div>
+
+      {/* Dialogs */}
+      {selectedLocation && (
+        <>
+          <LocationDialog
+            isOpen={showLocationDialog}
+            onClose={() => setShowLocationDialog(false)}
+            location={selectedLocation}
+          />
+          <ContactDialog
+            isOpen={showContactDialog}
+            onClose={() => setShowContactDialog(false)}
+            location={selectedLocation}
+          />
+        </>
+      )}
     </div>
   );
 }
