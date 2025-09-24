@@ -101,6 +101,45 @@ export default function Challenges() {
       progress: 100,
       isJoined: true,
       completedDate: "Hace 5 días"
+    },
+    {
+      id: 7,
+      title: "30 Días de Constancia",
+      description: "Entrena todos los días durante un mes",
+      participants: 4523,
+      duration: "30 días",
+      difficulty: "Intermedio",
+      reward: "Trofeo de Disciplina",
+      category: "Hábitos",
+      progress: 100,
+      isJoined: true,
+      completedDate: "Hace 2 semanas"
+    },
+    {
+      id: 8,
+      title: "Maratón Virtual",
+      description: "Completa 42.2km en actividades",
+      participants: 2156,
+      duration: "1 mes",
+      difficulty: "Avanzado",
+      reward: "Medalla Maratón",
+      category: "Cardio",
+      progress: 100,
+      isJoined: true,
+      completedDate: "Hace 1 mes"
+    },
+    {
+      id: 9,
+      title: "Fuerza Superior",
+      description: "Aumenta tu fuerza en 20% en ejercicios clave",
+      participants: 1892,
+      duration: "8 semanas",
+      difficulty: "Avanzado",
+      reward: "Badge de Fuerza",
+      category: "Fuerza",
+      progress: 100,
+      isJoined: true,
+      completedDate: "Hace 3 semanas"
     }
   ];
 
@@ -239,9 +278,23 @@ export default function Challenges() {
                         <Trophy className="h-4 w-4" />
                         <span>{challenge.reward}</span>
                       </div>
-                      <Button size="sm" className="bg-primary">
+                      <Button 
+                        size="sm" 
+                        className={joinedChallenges.has(challenge.id) ? "bg-destructive hover:bg-destructive/90" : "bg-primary"}
+                        onClick={() => {
+                          setJoinedChallenges(prev => {
+                            const newSet = new Set(prev);
+                            if (newSet.has(challenge.id)) {
+                              newSet.delete(challenge.id);
+                            } else {
+                              newSet.add(challenge.id);
+                            }
+                            return newSet;
+                          });
+                        }}
+                      >
                         <Play className="h-4 w-4 mr-1" />
-                        Unirse
+                        {joinedChallenges.has(challenge.id) ? "Abandonar" : "Unirse"}
                       </Button>
                     </div>
                   </div>
@@ -297,7 +350,11 @@ export default function Challenges() {
                         <Calendar className="h-4 w-4" />
                         <span>{challenge.totalDays - challenge.daysCompleted} días restantes</span>
                       </div>
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setSelectedChallenge(challenge)}
+                      >
                         Ver detalles
                       </Button>
                     </div>
@@ -340,7 +397,11 @@ export default function Challenges() {
                       <Trophy className="h-4 w-4 text-warning" />
                       <span>{challenge.reward}</span>
                     </div>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setSelectedCertificate(challenge)}
+                    >
                       Ver certificado
                     </Button>
                   </div>
@@ -350,6 +411,23 @@ export default function Challenges() {
           </div>
         )}
       </div>
+
+      {/* Dialogs */}
+      {selectedChallenge && (
+        <ChallengeDetailDialog
+          isOpen={!!selectedChallenge}
+          onClose={() => setSelectedChallenge(null)}
+          challenge={selectedChallenge}
+        />
+      )}
+      
+      {selectedCertificate && (
+        <CertificateDialog
+          isOpen={!!selectedCertificate}
+          onClose={() => setSelectedCertificate(null)}
+          challenge={selectedCertificate}
+        />
+      )}
     </div>
   );
 }

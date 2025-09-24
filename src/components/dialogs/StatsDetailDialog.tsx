@@ -76,7 +76,7 @@ export function StatsDetailDialog({ isOpen, onClose, stat }: StatsDetailDialogPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm mx-auto">
+      <DialogContent className="max-w-sm mx-auto max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <stat.icon className={`h-6 w-6 ${stat.color}`} />

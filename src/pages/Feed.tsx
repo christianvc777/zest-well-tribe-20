@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Heart, MessageCircle, Share, MoreHorizontal, Plus, Zap, Users } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, MessageCircle, Share, MoreHorizontal, Plus, Zap, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileCard, MobileCardContent, MobileCardHeader, MobileCardTitle } from "@/components/ui/mobile-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,14 +13,21 @@ export default function Feed() {
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
   const [commentingPost, setCommentingPost] = useState<any>(null);
   const [menuPost, setMenuPost] = useState<any>(null);
+  const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [imageIndexes, setImageIndexes] = useState<{[key: number]: number}>({});
 
-  const feedPosts = [
+  useEffect(() => {
+    const posts = JSON.parse(localStorage.getItem('userPosts') || '[]');
+    setUserPosts(posts);
+  }, []);
+
+  const staticPosts = [
     {
       id: 1,
       user: { name: "Carlos Mendoza", avatar: "", handle: "@carlos_fit", verified: true },
       timestamp: "Hace 2 horas",
       content: "¡Completé mi primera maratón! 42.2km en 3:45:30. Un año de entrenamiento constante vale la pena. 💪🏃‍♂️",
-      image: null,
+      images: [],
       stats: { likes: 124, comments: 18, shares: 7 },
       type: "achievement"
     },
@@ -29,7 +36,7 @@ export default function Feed() {
       user: { name: "Ana Rodríguez", avatar: "", handle: "@ana_wellness", verified: false },
       timestamp: "Hace 4 horas",
       content: "Rutina matutina de yoga completada ✨ 20 minutos de mindfulness para empezar el día con energía positiva.",
-      image: null,
+      images: [],
       stats: { likes: 89, comments: 12, shares: 4 },
       type: "workout"
     },
@@ -38,7 +45,7 @@ export default function Feed() {
       user: { name: "FitGym Centro", avatar: "", handle: "@fitgym_centro", verified: true },
       timestamp: "Hace 6 horas",
       content: "🔥 Nuevo programa de HIIT disponible. Sesiones de 30 minutos, máxima intensidad. ¡Reserva tu cupo para esta semana!",
-      image: null,
+      images: [],
       stats: { likes: 67, comments: 25, shares: 15 },
       type: "promotion"
     },
@@ -47,7 +54,7 @@ export default function Feed() {
       user: { name: "Miguel Torres", avatar: "", handle: "@miguel_strength", verified: false },
       timestamp: "Hace 8 horas",
       content: "Nuevo PR en deadlift: 180kg 🏋️‍♂️ La consistencia y la técnica correcta son clave. ¡Gracias a mi coach por la guía!",
-      image: null,
+      images: [],
       stats: { likes: 156, comments: 31, shares: 9 },
       type: "achievement"
     },
@@ -56,11 +63,13 @@ export default function Feed() {
       user: { name: "Nutrición Pro", avatar: "", handle: "@nutricion_pro", verified: true },
       timestamp: "Hace 10 horas",
       content: "💡 Tip del día: La hidratación es fundamental para el rendimiento. 2-3 litros de agua diarios, más si entrenas intenso.",
-      image: null,
+      images: [],
       stats: { likes: 203, comments: 45, shares: 67 },
       type: "tip"
     }
   ];
+
+  const allPosts = [...userPosts, ...staticPosts];
 
   const handleLike = (postId: number) => {
     setLikedPosts(prev => {
@@ -92,6 +101,20 @@ export default function Feed() {
       case "tip": return "💡";
       default: return "📝";
     }
+  };
+
+  const nextImage = (postId: number, totalImages: number) => {
+    setImageIndexes(prev => ({
+      ...prev,
+      [postId]: ((prev[postId] || 0) + 1) % totalImages
+    }));
+  };
+
+  const prevImage = (postId: number, totalImages: number) => {
+    setImageIndexes(prev => ({
+      ...prev,
+      [postId]: ((prev[postId] || 0) - 1 + totalImages) % totalImages
+    }));
   };
 
   return (
@@ -141,7 +164,7 @@ export default function Feed() {
         </MobileCard>
 
         {/* Posts del feed */}
-        {feedPosts.map((post) => (
+        {allPosts.map((post) => (
           <MobileCard key={post.id} variant="elevated">
             <MobileCardHeader>
               <div className="flex items-start justify-between">
@@ -178,7 +201,73 @@ export default function Feed() {
             </MobileCardHeader>
 
             <MobileCardContent>
+              {/* Información del producto (para posts de venta) */}
+              {post.isForSale && post.productName && (
+                <div className="mb-3 p-3 bg-muted rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-sm">{post.productName}</h4>
+                      <p className="text-sm text-muted-foreground">En venta</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-success">{post.salePrice}</p>
+                      <Button size="sm" className="bg-success hover:bg-success/90">
+                        Comprar
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <p className="text-sm mb-4 leading-relaxed">{post.content}</p>
+              
+              {/* Galería de imágenes */}
+              {post.images && post.images.length > 0 && (
+                <div className="mb-4 relative">
+                  <div className="relative bg-muted rounded-lg h-64 overflow-hidden">
+                    <img
+                      src={post.images[imageIndexes[post.id] || 0]}
+                      alt={`Post image ${(imageIndexes[post.id] || 0) + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {post.images.length > 1 && (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="absolute left-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 opacity-80 hover:opacity-100"
+                          onClick={() => prevImage(post.id, post.images.length)}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 opacity-80 hover:opacity-100"
+                          onClick={() => nextImage(post.id, post.images.length)}
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
+                          <div className="flex space-x-1">
+                            {post.images.map((_, index) => (
+                              <div
+                                key={index}
+                                className={`w-2 h-2 rounded-full ${
+                                  index === (imageIndexes[post.id] || 0) ? 'bg-white' : 'bg-white/50'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 text-center">
+                    {(imageIndexes[post.id] || 0) + 1} de {post.images.length} imagen{post.images.length > 1 ? 'es' : ''}
+                  </p>
+                </div>
+              )}
               
               {/* Acciones del post */}
               <div className="flex items-center justify-between pt-3 border-t border-border">

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowLeft, Camera, Image as ImageIcon, MapPin, Users, Tag, Send } from "lucide-react";
+import { useState, useRef } from "react";
+import { ArrowLeft, Camera, Image as ImageIcon, MapPin, Users, Tag, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileCard, MobileCardContent, MobileCardHeader, MobileCardTitle } from "@/components/ui/mobile-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,6 +17,9 @@ export default function CreatePost() {
   const [isForSale, setIsForSale] = useState(false);
   const [salePrice, setSalePrice] = useState("");
   const [productName, setProductName] = useState("");
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const postTypes = [
     { type: "achievement", label: "Logro", emoji: "🏆", color: "text-success" },
@@ -45,13 +48,65 @@ export default function CreatePost() {
       return;
     }
 
-    // Simular creación del post
+    // Crear el nuevo post y guardarlo en localStorage para que aparezca en Feed
+    const newPost = {
+      id: Date.now(),
+      user: { name: "María González", avatar: "", handle: "@maria_fitness", verified: false },
+      timestamp: "Ahora",
+      content: postContent,
+      images: selectedImages,
+      stats: { likes: 0, comments: 0, shares: 0 },
+      type: postType,
+      isForSale,
+      productName: isForSale ? productName : undefined,
+      salePrice: isForSale ? salePrice : undefined
+    };
+
+    // Guardar en localStorage
+    const existingPosts = JSON.parse(localStorage.getItem('userPosts') || '[]');
+    existingPosts.unshift(newPost);
+    localStorage.setItem('userPosts', JSON.stringify(existingPosts));
+
     toast({
       title: "¡Publicación creada!",
       description: "Tu post se ha compartido con la comunidad",
     });
 
     navigate("/feed");
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newImages: string[] = [];
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target?.result) {
+            newImages.push(e.target.result as string);
+            if (newImages.length === files.length) {
+              setSelectedImages(prev => [...prev, ...newImages]);
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    if (currentImageIndex >= selectedImages.length - 1) {
+      setCurrentImageIndex(Math.max(0, selectedImages.length - 2));
+    }
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex(prev => (prev + 1) % selectedImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex(prev => (prev - 1 + selectedImages.length) % selectedImages.length);
   };
 
   return (
@@ -183,15 +238,33 @@ export default function CreatePost() {
         <section>
           <h2 className="text-lg font-semibold mb-3">Agregar Contenido</h2>
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" size="sm" className="flex items-center justify-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center justify-center space-x-2"
+              onClick={() => fileInputRef.current?.click()}
+            >
               <Camera className="h-4 w-4" />
               <span>Foto</span>
             </Button>
-            <Button variant="outline" size="sm" className="flex items-center justify-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center justify-center space-x-2"
+              onClick={() => fileInputRef.current?.click()}
+            >
               <ImageIcon className="h-4 w-4" />
               <span>Galería</span>
             </Button>
           </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageUpload}
+            className="hidden"
+          />
         </section>
 
         {/* Vista previa */}
@@ -249,13 +322,69 @@ export default function CreatePost() {
                 {postContent || "Escribe algo para ver la vista previa..."}
               </p>
 
-              {/* Placeholder para imagen */}
-              <div className="mt-3 bg-muted rounded-lg h-48 flex items-center justify-center">
-                <div className="text-center text-muted-foreground">
-                  <ImageIcon className="h-8 w-8 mx-auto mb-2" />
-                  <p className="text-sm">Imagen del post</p>
+              {/* Imágenes del post */}
+              {selectedImages.length > 0 ? (
+                <div className="mt-3 relative">
+                  <div className="relative bg-muted rounded-lg h-48 overflow-hidden">
+                    <img
+                      src={selectedImages[currentImageIndex]}
+                      alt={`Preview ${currentImageIndex + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="absolute top-2 right-2 h-6 w-6 p-0"
+                      onClick={() => removeImage(currentImageIndex)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                    {selectedImages.length > 1 && (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="absolute left-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                          onClick={prevImage}
+                        >
+                          ←
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="absolute right-8 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                          onClick={nextImage}
+                        >
+                          →
+                        </Button>
+                        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
+                          <div className="flex space-x-1">
+                            {selectedImages.map((_, index) => (
+                              <div
+                                key={index}
+                                className={`w-2 h-2 rounded-full ${
+                                  index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 text-center">
+                    {currentImageIndex + 1} de {selectedImages.length} imagen{selectedImages.length > 1 ? 'es' : ''}
+                  </p>
                 </div>
-              </div>
+              ) : (
+                <div className="mt-3 bg-muted rounded-lg h-48 flex items-center justify-center">
+                  <div className="text-center text-muted-foreground">
+                    <ImageIcon className="h-8 w-8 mx-auto mb-2" />
+                    <p className="text-sm">Imagen del post</p>
+                    <p className="text-xs mt-1">Usa los botones de arriba para agregar fotos</p>
+                  </div>
+                </div>
+              )}
             </MobileCardContent>
           </MobileCard>
         </section>

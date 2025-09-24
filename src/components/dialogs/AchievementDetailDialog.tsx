@@ -105,7 +105,7 @@ export function AchievementDetailDialog({ isOpen, onClose, achievement }: Achiev
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm mx-auto">
+      <DialogContent className="max-w-sm mx-auto max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <span className="text-2xl">{details.icon}</span>

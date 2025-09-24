@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 export default function Events() {
   const [activeFilter, setActiveFilter] = useState<"all" | "nearby" | "virtual" | "joined">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [registeredEvents, setRegisteredEvents] = useState<Set<number>>(new Set([2]));
 
   const events = [
     {
@@ -215,8 +216,8 @@ export default function Events() {
 
         {/* Lista de eventos */}
         <div className="space-y-4">
-          {filteredEvents.map((event) => (
-            <MobileCard key={event.id} variant={event.isJoined ? "success" : "elevated"}>
+              {filteredEvents.map((event) => (
+            <MobileCard key={event.id} variant={registeredEvents.has(event.id) ? "success" : "elevated"}>
               <MobileCardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -231,7 +232,7 @@ export default function Events() {
                       <Badge variant="outline" className={getTypeColor(event.type)}>
                         {event.type}
                       </Badge>
-                      {event.isJoined && (
+                      {registeredEvents.has(event.id) && (
                         <Badge className="bg-success text-success-foreground">
                           ✓ Inscrito
                         </Badge>
@@ -290,10 +291,21 @@ export default function Events() {
                     </div>
                     <Button 
                       size="sm" 
-                      variant={event.isJoined ? "outline" : "default"}
-                      className={event.isJoined ? "" : "bg-primary"}
+                      variant={registeredEvents.has(event.id) ? "outline" : "default"}
+                      className={registeredEvents.has(event.id) ? "" : "bg-primary"}
+                      onClick={() => {
+                        setRegisteredEvents(prev => {
+                          const newSet = new Set(prev);
+                          if (newSet.has(event.id)) {
+                            newSet.delete(event.id);
+                          } else {
+                            newSet.add(event.id);
+                          }
+                          return newSet;
+                        });
+                      }}
                     >
-                      {event.isJoined ? "Ver detalles" : "Inscribirse"}
+                      {registeredEvents.has(event.id) ? "Inscrito ✓" : "Inscribirse"}
                     </Button>
                   </div>
                 </div>
