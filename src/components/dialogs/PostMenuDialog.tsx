@@ -43,7 +43,7 @@ export function PostMenuDialog({ isOpen, onClose, post, isOwnPost = false }: Pos
         if (navigator.share) {
           navigator.share({
             title: "Post de " + post.user.name,
-            text: "Mira esta publicación en FitApp",
+            text: "Mira esta publicación en Teso",
             url: window.location.href
           });
         } else {

@@ -37,7 +37,7 @@ export function CertificateDialog({ isOpen, onClose, challenge }: CertificateDia
           certificateId: "CERT-2024-000001",
           duration: "Completado",
           achievements: [],
-          signature: "Equipo FitApp",
+          signature: "Equipo Teso",
           role: "Certificación Digital",
           validUntil: "Certificado permanente"
         };
@@ -66,7 +66,7 @@ export function CertificateDialog({ isOpen, onClose, challenge }: CertificateDia
                   <Award className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="font-bold text-lg text-primary">CERTIFICADO DE LOGRO</h3>
-                <p className="text-xs text-muted-foreground">FitApp Community</p>
+                <p className="text-xs text-muted-foreground">Teso Community</p>
               </div>
 
               {/* Contenido del certificado */}
